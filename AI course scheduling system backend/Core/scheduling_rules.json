@@ -1,0 +1,76 @@
+{
+    "schedulingRules": {
+        "basic": {
+            "fixedClassroom": false,
+            "timeRules": [
+                "sportAfternoon",
+                "sportNoFollowing",
+                "nightClass",
+                "labNightOnly"
+            ],
+            "continuousHours": false,
+            "clearPrevious": true,
+            "autoArrangeRoom": true
+        },
+        "conflict": {
+            "strategy": "split",
+            "settings": {
+                "allowCrossWeek": true
+            }
+        },
+        "priority_rules": [
+            {
+                "rule_id": 1,
+                "label": "学生所在院系优先",
+                "enabled": true
+            },
+            {
+                "rule_id": 2,
+                "label": "开课院系优先",
+                "enabled": true
+            },
+            {
+                "rule_id": 3,
+                "label": "课程性质优先（必修>选修）",
+                "enabled": true
+            },
+            {
+                "rule_id": 4,
+                "label": "学时类型优先（实验>理论）",
+                "enabled": true
+            },
+            {
+                "rule_id": 5,
+                "label": "课程类型优先（专业核心课>通课）",
+                "enabled": true
+            }
+        ],
+        "priorities": [
+            {
+                "courseId": "C001",
+                "priority": 1
+            },
+            {
+                "courseId": "C002",
+                "priority": 2
+            }
+        ],
+        "teacherLimits": [
+            {
+                "teacherId": "123",
+                "limits": {
+                    "dailyMax": 6,
+                    "weeklyMax": 30,
+                    "amMax": 3,
+                    "pmMax": 3
+                }
+            }
+        ],
+        "forbidden": {
+            "teachers": [
+                "123456"
+            ],
+            "courses": []
+        }
+    }
+}
