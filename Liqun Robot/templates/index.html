@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI聊天界面</title>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="{
+
+  { url_for('static', filename='favicon.ico') }}">
+
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .nav-menu {
+            width: 240px;
+            height: 100vh;
+            background-color: #304156;
+            box-shadow: 2px 0 6px rgba(0,21,41,.35);
+        }
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 聊天界面样式 */
+
+        #chat-container {
+            flex: 1;
+            background: white;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+            overflow-y: auto;
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+        }
+
+        #input-container {
+            display: flex;
+            gap: 10px;
+            padding: 20px;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+        }
+
+        #message-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        #message-input:focus {
+            outline: none;
+            border-color: #409EFF;
+        }
+
+        h1 {
+            color: #303133;
+            margin: 0 0 20px 0;
+            font-size: 24px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ebeef5;
+        }
+
+        /* 发送按钮样式 */
+        .el-button {
+            transition: all .3s;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .user-message {
+            background-color: #e3f2fd;
+            margin-left: 20%;
+        }
+        .ai-message {
+            background-color: #f5f5f5;
+            margin-right: 20%;
+        }
+        /* 添加Markdown样式 */
+        .bold {
+            font-weight: bold;
+        }
+        .heading {
+            margin-top: 10px;
+            margin-bottom: 5px;
+            padding-left: 20px;
+        }
+
+                /* 基础按钮样式 */
+        .btn {
+            min-width: 120px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: -apple-system, system-ui, sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 悬浮效果 */
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* 点击效果 */
+        .btn:active {
+            transform: translateY(1px);
+            filter: brightness(0.9);
+        }
+
+        /* 主按钮样式 */
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+            color: white;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+        }
+
+        /* 次按钮样式 */
+        .btn-secondary {
+            background: linear-gradient(135deg, #F3F4F6, #E5E7EB);
+            color: #1F2937;
+            border: 1px solid #E5E7EB;
+        }
+
+        /* 成功按钮 */
+        .btn-success {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+        }
+
+        /* 危险按钮 */
+        .btn-danger {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            color: white;
+        }
+
+        /* 加载动画 */
+        .btn.loading::after {
+            content: "";
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 图标按钮 */
+        .btn-icon {
+            width: 48px;
+            height: 48px;
+            min-width: auto;
+            border-radius: 50%;
+            padding: 0;
+        }
+
+        /* 边框动画效果 */
+        .btn-border::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #3B82F6, #8B5CF6, #EC4899);
+            border-radius: 10px;
+            z-index: -1;
+            animation: rotate-border 3s linear infinite;
+        }
+
+        @keyframes rotate-border {
+            100% { transform: rotate(360deg); }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <div class="container">
+            <!-- 左侧导航栏保持不变 -->
+            <el-menu
+                class="nav-menu"
+                default-active="1"
+                background-color="#304156"
+                text-color="#bfcbd9"
+                active-text-color="#409EFF">
+
+                <el-submenu index="1">
+                    <template slot="title">
+                        <i class="el-icon-menu"></i>
+                        <span>主菜单一</span>
+                    </template>
+                    <el-menu-item index="1-1">子选项1</el-menu-item>
+                    <el-menu-item index="1-2">子选项2</el-menu-item>
+                </el-submenu>
+
+                <el-submenu index="2">
+                    <template slot="title">
+                        <i class="el-icon-chat-line-round"></i>
+                        <span>AI对话</span>
+                    </template>
+                    <el-menu-item index="2-1">聊天记录</el-menu-item>
+                    <el-menu-item index="2-2">设置</el-menu-item>
+                </el-submenu>
+            </el-menu>
+
+            <!-- 右侧内容区修改为聊天界面 -->
+            <div class="main-content">
+                <h1>利群AI机器人</h1>
+                <div id="chat-container">
+                    <!-- 这里可以添加聊天记录 -->
+                    <div class="el-alert el-alert--info" style="margin-bottom:10px">
+                        <div class="el-alert__content">
+                            <span class="el-alert__title">欢迎使用利群AI助手，请问有什么可以帮您？</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="input-container">
+                    <input type="text" id="message-input" placeholder="输入消息...">
+                    <button class="btn btn-primary btn-border" onclick="sendMessage()">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <!-- 引入 Vue 和 Element UI -->
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+    <script>
+
+        new Vue({
+            el: '#app'
+        })
+s
+        function formatMessage(message) {
+            // 处理粗体
+            message = message.replace(/\*\*(.*?)\*\*/g, '<span class="bold">$1</span>');
+
+            // 处理标题和缩进
+            message = message.split('\n').map(line => {
+                if (line.startsWith('##')) {
+                    return '\n<div class="heading">' + line.substring(2).trim() + '</div>';
+                }
+                return line;
+            }).join('\n');
+
+            return message;
+        }
+
+        function addMessage(message, isUser) {
+            const chatContainer = document.getElementById('chat-container');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+            messageDiv.innerHTML = isUser ? message : formatMessage(message);
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            addMessage(message, true);
+            input.value = '';
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                // 创建 EventSource 来处理流式响应
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message ai-message';
+                document.getElementById('chat-container').appendChild(messageDiv);
+
+                const reader = new ReadableStreamDefaultReader(response.body);
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const {value, done} = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, {stream: true});
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                messageDiv.innerHTML = formatMessage(messageDiv.innerHTML + data.content);
+                                const chatContainer = document.getElementById('chat-container');
+                                chatContainer.scrollTop = chatContainer.scrollHeight;
+                            } catch (e) {
+                                console.error('解析错误:', e);
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                addMessage('发生错误: ' + error, false);
+            }
+        }
+
+        document.getElementById('message-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
